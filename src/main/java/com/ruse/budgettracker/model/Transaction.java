@@ -1,5 +1,6 @@
 package com.ruse.budgettracker.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -19,14 +20,15 @@ public class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    private double amount;
+    private Double amount;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate transactionDate;
     private String description;
     private String type;
 
     public Transaction() {}
 
-    public Transaction(Account account, Category category, double amount, LocalDate transactionDate, String description, String type) {
+    public Transaction(Account account, Category category, Double amount, LocalDate transactionDate, String description, String type) {
         this.account = account;
         this.category = category;
         this.amount = amount;
@@ -59,11 +61,11 @@ public class Transaction {
         this.category = category;
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

@@ -19,11 +19,11 @@ public class Account {
 
     private String accountType;
     private String currency;
-    private double initialBalance;
+    private Double initialBalance;
 
     public Account() {}
 
-    public Account(User user, String name, String accountType, String currency, double initialBalance) {
+    public Account(User user, String name, String accountType, String currency, Double initialBalance) {
         this.user = user;
         this.name = name;
         this.accountType = accountType;
@@ -71,11 +71,11 @@ public class Account {
         this.currency = currency;
     }
 
-    public double getInitialBalance() {
+    public Double getInitialBalance() {
         return initialBalance;
     }
 
-    public void setInitialBalance(double initialBalance) {
+    public void setInitialBalance(Double initialBalance) {
         this.initialBalance = initialBalance;
     }
 

@@ -17,13 +17,13 @@ public class Budget {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    private double limitAmount;
+    private Double limitAmount;
     private int periodMonth;
     private int periodYear;
 
     public Budget() {}
 
-    public Budget(User user, Category category, double limitAmount, int periodMonth, int periodYear) {
+    public Budget(User user, Category category, Double limitAmount, int periodMonth, int periodYear) {
         this.user = user;
         this.category = category;
         this.limitAmount = limitAmount;
@@ -55,11 +55,11 @@ public class Budget {
         this.category = category;
     }
 
-    public double getLimitAmount() {
+    public Double getLimitAmount() {
         return limitAmount;
     }
 
-    public void setLimitAmount(double limitAmount) {
+    public void setLimitAmount(Double limitAmount) {
         this.limitAmount = limitAmount;
     }
 
