@@ -1,9 +1,17 @@
 package com.ruse.budgettracker.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "budgets")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Budget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,62 +28,4 @@ public class Budget {
     private Double limitAmount;
     private int periodMonth;
     private int periodYear;
-
-    public Budget() {}
-
-    public Budget(User user, Category category, Double limitAmount, int periodMonth, int periodYear) {
-        this.user = user;
-        this.category = category;
-        this.limitAmount = limitAmount;
-        this.periodMonth = periodMonth;
-        this.periodYear = periodYear;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Double getLimitAmount() {
-        return limitAmount;
-    }
-
-    public void setLimitAmount(Double limitAmount) {
-        this.limitAmount = limitAmount;
-    }
-
-    public int getPeriodMonth() {
-        return periodMonth;
-    }
-
-    public void setPeriodMonth(int periodMonth) {
-        this.periodMonth = periodMonth;
-    }
-
-    public int getPeriodYear() {
-        return periodYear;
-    }
-
-    public void setPeriodYear(int periodYear) {
-        this.periodYear = periodYear;
-    }
 }
