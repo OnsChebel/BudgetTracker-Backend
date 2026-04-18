@@ -15,6 +15,10 @@ public class Category {
     private String name;
     private String icon;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Category() {}
 
     public Category(String name, String icon) {
@@ -36,6 +40,14 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getIcon() {

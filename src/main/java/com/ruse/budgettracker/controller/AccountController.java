@@ -1,53 +1,84 @@
 package com.ruse.budgettracker.controller;
 
 import com.ruse.budgettracker.model.Account;
-import com.ruse.budgettracker.repository.AccountRepository;
+import com.ruse.budgettracker.model.User;
+import com.ruse.budgettracker.service.UserService;
 import com.ruse.budgettracker.service.AccountService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-
 @RestController
-@RequestMapping("/Account")
+@RequestMapping("/accounts")
 public class AccountController {
-    private AccountService accountService;
 
-    public AccountController(AccountService accountService) {
+    private final AccountService accountService;
+    private final UserService userService;
+
+    public AccountController(AccountService accountService, UserService userService) {
         this.accountService = accountService;
+        this.userService = userService;
     }
 
-    @PostMapping("/newaccount")
-    public ResponseEntity<Account> createAccount(@RequestBody Account account){
-        Account newAccount = accountService.createAccount(account);
-        return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
+    @PostMapping("/new-account")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Account createAccount(@RequestBody Account account){
+        User currentUser = userService.getLoggedInUser();
+        account.setUser(currentUser);
+        return accountService.createAccount(account);
     }
 
-    @GetMapping("/allaccounts")
-    public ResponseEntity<List<Account>> getAllAccounts(){
-        List<Account> accounts = accountService.getAllAccounts();
-        return new ResponseEntity<>(accounts, HttpStatus.OK);
+    @GetMapping("/my-accounts")
+    public List<Account> getMyAccounts(){
+        User currentUser = userService.getLoggedInUser();
+        return accountService.findByUserId(currentUser.getId());
     }
 
     @GetMapping("/account/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable ("id") Long id){
+    public Account getAccountById(@PathVariable("id") Long id){
+        User currentUser = userService.getLoggedInUser();
         Account account = accountService.getAccountById(id);
-        return new ResponseEntity<>(account, HttpStatus.OK);
+
+        if (!account.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this account");
+        }
+
+        return account;
     }
 
-    @PutMapping("/updateaccount")
-    public ResponseEntity<Account> updateAccount(@RequestBody Account account){
-        Account updatedAccount = accountService.updateAccount(account);
-        return new ResponseEntity<>(updatedAccount, HttpStatus.OK);
+    @PutMapping("/update-account")
+    public Account updateAccount(@RequestBody Account account){
+        User currentUser = userService.getLoggedInUser();
+        Account existingAccount = accountService.getAccountById(account.getId());
+
+        if (!existingAccount.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this account");
+        }
+
+        account.setUser(currentUser);
+
+        return accountService.updateAccount(account);
     }
 
-    @DeleteMapping("/deleteaccount/{id}")
-    public ResponseEntity<?> deleteAccountById(@PathVariable ("id") Long id){
+    @DeleteMapping("/delete-account/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccountById(@PathVariable("id") Long id){
+        User currentUser = userService.getLoggedInUser();
+        Account account = accountService.getAccountById(id);
+
+        if (!account.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to delete this account");
+        }
+
         accountService.deleteAccount(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/total-balance")
+    public Double getTotalBalance(){
+        User currentUser = userService.getLoggedInUser();
 
+        return accountService.getTotalBalanceByUserId(currentUser.getId());
+    }
 }

@@ -1,50 +1,82 @@
 package com.ruse.budgettracker.controller;
 
 import com.ruse.budgettracker.model.Transaction;
+import com.ruse.budgettracker.model.User;
 import com.ruse.budgettracker.service.TransactionService;
+import com.ruse.budgettracker.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/transactions")
-@CrossOrigin(origins = "http://localhost:4200")
 public class TransactionController {
     private final TransactionService transactionService;
+    private final UserService userService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService, UserService userService) {
         this.transactionService = transactionService;
+        this.userService = userService;
     }
 
-    @PostMapping("/newtransaction")
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction){
-        Transaction newTransaction = transactionService.createTransaction(transaction);
-        return new ResponseEntity<>(newTransaction, HttpStatus.CREATED);
+    @PostMapping("/new-transaction")
+    public Transaction createTransaction(@RequestBody Transaction transaction){
+        User currentUser = userService.getLoggedInUser();
+        transaction.setUser(currentUser);
+        return transactionService.createTransaction(transaction);
     }
 
-    @GetMapping("/alltransactions")
-    public ResponseEntity<List<Transaction>> getAllTransactions(){
-        List<Transaction> allTransactions = transactionService.getAllTransactions();
-        return new ResponseEntity<>(allTransactions, HttpStatus.OK);
+    @GetMapping("/my-transactions")
+    public List<Transaction> getMyTransactions(){
+        User currentUser = userService.getLoggedInUser();
+        return transactionService.findByUserId(currentUser.getId());
     }
 
     @GetMapping("/transaction/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable ("id") Long id) {
+    public Transaction getTransactionById(@PathVariable ("id") Long id) {
+        User currentUser = userService.getLoggedInUser();
         Transaction transaction = transactionService.getTransactionById(id);
-        return new ResponseEntity<>(transaction, HttpStatus.OK);
+        if(!transaction.getUser().getId().equals(currentUser.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to see this transaction");
+        }
+        return transactionService.getTransactionById(id);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction) {
-        Transaction updatedTransaction = transactionService.updateTransaction(transaction);
-        return new ResponseEntity<>(updatedTransaction, HttpStatus.OK);
+    @PutMapping("/update-transaction")
+    public Transaction updateTransaction(@RequestBody Transaction transaction) {
+        User currentUser = userService.getLoggedInUser();
+        Transaction currentTransaction = transactionService.getTransactionById(transaction.getId());
+
+        if(!currentTransaction.getUser().getId().equals(currentUser.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this transaction");
+        }
+        transaction.setUser(currentUser);
+        return transactionService.updateTransaction(transaction);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Transaction> deleteTransaction(@PathVariable ("id") Long id) {
+    @DeleteMapping("/delete-transaction/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTransaction(@PathVariable ("id") Long id) {
+        User currentUser = userService.getLoggedInUser();
+        Transaction currentTransaction = transactionService.getTransactionById(id);
+
+        if(!currentTransaction.getUser().getId().equals(currentUser.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this transaction");
+        }
         transactionService.deleteTransaction(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/total-income")
+    public Double getTotalIncome() {
+        User currentUser = userService.getLoggedInUser();
+        return transactionService.getTotalIncomeByUserId(currentUser.getId());
+    }
+
+    @GetMapping("/total-expense")
+    public Double getTotalExpense() {
+        User currentUser = userService.getLoggedInUser();
+        return transactionService.getTotalExpenseByUserId(currentUser.getId());
     }
 }

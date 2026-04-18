@@ -23,8 +23,8 @@ public class LoanService {
         return loanRepository.save(loan);
     }
 
-    public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
+    public List<Loan> findByUserId(Long id) {
+        return loanRepository.findByUserId(id);
     }
 
     public Loan getLoanById(Long id) {
@@ -59,11 +59,8 @@ public class LoanService {
 
         for (Integer month = 1; month <= loan.getLoanTerm(); month++) {
 
-            //this month's interest (Remaining Principal * r)
             Double currentInterest = remainingPrincipal*r;
-            //this month's principal payment (Monthly Payment - Interest)
             Double currentPrincipal = monthlyPayment-currentInterest;
-            //the remaining principal (Previous Remaining - Principal Paid)
             remainingPrincipal = remainingPrincipal-currentPrincipal;
 
             if (remainingPrincipal < 0) {

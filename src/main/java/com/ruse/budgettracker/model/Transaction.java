@@ -20,6 +20,10 @@ public class Transaction {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private Double amount;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate transactionDate;
@@ -92,4 +96,8 @@ public class Transaction {
     public void setType(String type) {
         this.type = type;
     }
+
+    public User getUser() {return user;}
+
+    public void setUser(User user) {this.user = user;}
 }

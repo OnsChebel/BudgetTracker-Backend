@@ -1,10 +1,13 @@
 package com.ruse.budgettracker.controller;
 
 import com.ruse.budgettracker.model.Category;
+import com.ruse.budgettracker.model.User;
 import com.ruse.budgettracker.service.CategoryService;
+import com.ruse.budgettracker.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -13,39 +16,59 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final UserService userService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, UserService userService) {
         this.categoryService = categoryService;
+        this.userService = userService;
     }
 
-    @PostMapping("/newcategory")
-    public ResponseEntity<Category> addCategory(@RequestBody Category category) {
-        Category newCategory = categoryService.createCategory(category);
-        return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
+    @PostMapping("/new-category")
+    public Category addCategory(@RequestBody Category category) {
+        User currentUser = userService.getLoggedInUser();
+        category.setUser(currentUser);
+        return categoryService.createCategory(category);
     }
 
-    @GetMapping("/allcategories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+    @GetMapping("/my-categories")
+    public List<Category> getMyCategories() {
+        User currentUser = userService.getLoggedInUser();
+        return categoryService.findByUserId(currentUser.getId());
     }
 
-    @GetMapping("/find/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable ("id") Long id) {
+    @GetMapping("/category/{id}")
+    public Category getCategoryById(@PathVariable ("id") Long id) {
+        User currentUser = userService.getLoggedInUser();
         Category category = categoryService.getCategoryById(id);
-        return new ResponseEntity<>(category, HttpStatus.OK);
+
+        if(!category.getUser().getId().equals(currentUser.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this category");
+        }
+        return category;
     }
 
-    @PutMapping("/updatecategory")
-    public ResponseEntity<Category> updateCategory(@RequestBody Category category) {
-        Category updatedCategory = categoryService.updateCategory(category);
-        return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
+    @PutMapping("/update-category")
+    public Category updateCategory(@RequestBody Category category) {
+        User currentUser = userService.getLoggedInUser();
+        Category existingCategory = categoryService.getCategoryById(category.getId());
+
+        if(!existingCategory.getUser().getId().equals(currentUser.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this category");
+        }
+        category.setUser(currentUser);
+        return categoryService.updateCategory(category);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable ("id") Long id) {
-        categoryService.deleteCategoryById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @DeleteMapping("/delete-category/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable ("id") Long id) {
+       User currentUser = userService.getLoggedInUser();
+       Category category = categoryService.getCategoryById(id);
+
+       if(!category.getUser().getId().equals(currentUser.getId())){
+           throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this budget");
+       }
+       categoryService.deleteCategoryById(id);
     }
 
 

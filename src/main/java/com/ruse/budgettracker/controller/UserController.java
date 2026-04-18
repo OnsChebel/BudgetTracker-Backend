@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Users")
+@RequestMapping("/users")
 public class UserController {
     private UserService userService;
 
@@ -18,34 +18,35 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/newuser")
+    @PostMapping("/new-user")
     public ResponseEntity<User> addUser(@RequestBody User user) {
         User newUser = userService.createUser(user);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/allusers")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    @GetMapping("/all-users")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<User> getUser(@PathVariable ("id") Long id) {
-        User user = userService.getUserById(id);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    public User getUser(@PathVariable ("id") Long id) {
+        return userService.getUserById(id);
     }
 
-    @PutMapping("/updateuser")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        User updatedUser = userService.updateUser(user);
-        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    @PutMapping("/update-user")
+    public User updateUser(@RequestBody User user) {
+        return userService.updateUser(user);
     }
 
-    @DeleteMapping("/deleteuser/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable ("id") Long id) {
+    @DeleteMapping("/delete-user/{id}")
+    public void deleteUser(@PathVariable ("id") Long id) {
         userService.deleteUser(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/my-profile")
+    public User getMyProfile() {
+        return userService.getLoggedInUser();
     }
 
 }

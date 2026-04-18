@@ -21,8 +21,8 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<Category> findByUserId(Long id) {
+        return categoryRepository.findByUserId(id);
     }
 
     public Category getCategoryById(Long id) {

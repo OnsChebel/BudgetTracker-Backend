@@ -1,6 +1,5 @@
 package com.ruse.budgettracker.service;
 
-
 import com.ruse.budgettracker.model.Account;
 import com.ruse.budgettracker.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    public List<Account> getAllAccounts(){
-        return accountRepository.findAll();
+    public List<Account> findByUserId(Long userId){
+        return accountRepository.findByUserId(userId);
     }
 
     public Account getAccountById(Long id){
@@ -35,5 +34,13 @@ public class AccountService {
 
     public void deleteAccount(Long id){
         accountRepository.deleteById(id);
+    }
+
+    public Double getTotalBalanceByUserId(Long userId){
+        Double totalBalance = accountRepository.getTotalBalanceByUserId(userId);
+        if(totalBalance == null){
+            return 0.0;
+        }
+        return totalBalance;
     }
 }
