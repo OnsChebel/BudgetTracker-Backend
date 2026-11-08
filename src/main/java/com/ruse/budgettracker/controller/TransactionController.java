@@ -4,6 +4,7 @@ import com.ruse.budgettracker.model.Transaction;
 import com.ruse.budgettracker.model.User;
 import com.ruse.budgettracker.service.TransactionService;
 import com.ruse.budgettracker.service.UserService;
+import com.ruse.budgettracker.dto.CategoryTotal;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,8 +25,7 @@ public class TransactionController {
     @PostMapping("/new-transaction")
     public Transaction createTransaction(@RequestBody Transaction transaction){
         User currentUser = userService.getLoggedInUser();
-        transaction.setUser(currentUser);
-        return transactionService.createTransaction(transaction);
+        return transactionService.createTransaction(transaction, currentUser);
     }
 
     @GetMapping("/my-transactions")
@@ -53,7 +53,7 @@ public class TransactionController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to update this transaction");
         }
         transaction.setUser(currentUser);
-        return transactionService.updateTransaction(transaction);
+        return transactionService.updateTransaction(transaction, currentUser);
     }
 
     @DeleteMapping("/delete-transaction/{id}")
@@ -78,5 +78,10 @@ public class TransactionController {
     public Double getTotalExpense() {
         User currentUser = userService.getLoggedInUser();
         return transactionService.getTotalExpenseByUserId(currentUser.getId());
+    }
+    @GetMapping("/summary-by-category")
+    public List<CategoryTotal> getSummaryByCategory() {
+        User currentUser = userService.getLoggedInUser();
+        return transactionService.getSummaryByCategory(currentUser.getId());
     }
 }

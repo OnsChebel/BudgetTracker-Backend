@@ -15,4 +15,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.id = :userId AND UPPER(t.type) = 'EXPENSE'")
     Double getTotalExpenseByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT t.category.id, t.type, SUM(t.amount) FROM Transaction t " +
+            "WHERE t.user.id = :userId GROUP BY t.category.id, t.type")
+    List<Object[]> sumByCategoryAndType(@Param("userId") Long userId);
+
+    @Query("SELECT t.account.id, t.type, SUM(t.amount) FROM Transaction t " +
+            "WHERE t.user.id = :userId GROUP BY t.account.id, t.type")
+    List<Object[]> sumByAccountAndType(@Param("userId") Long userId);
 }

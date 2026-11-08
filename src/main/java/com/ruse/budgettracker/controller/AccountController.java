@@ -4,6 +4,7 @@ import com.ruse.budgettracker.model.Account;
 import com.ruse.budgettracker.model.User;
 import com.ruse.budgettracker.service.UserService;
 import com.ruse.budgettracker.service.AccountService;
+import com.ruse.budgettracker.dto.AccountBalance;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -80,5 +81,11 @@ public class AccountController {
         User currentUser = userService.getLoggedInUser();
 
         return accountService.getTotalBalanceByUserId(currentUser.getId());
+    }
+
+    @GetMapping("/balances")
+    public List<AccountBalance> getBalances() {
+        User currentUser = userService.getLoggedInUser();
+        return accountService.getBalances(currentUser.getId());
     }
 }

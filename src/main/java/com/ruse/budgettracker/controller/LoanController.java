@@ -47,6 +47,16 @@ public class LoanController {
         return loanService.getLoanById(id);
     }
 
+    @GetMapping("/schedule/{id}")
+    public List<LoanScheduleRow> getLoanSchedule(@PathVariable("id") Long id) {
+        User currentUser = userService.getLoggedInUser();
+        Loan loan = loanService.getLoanById(id);
+        if (!loan.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this loan");
+        }
+        return loanService.generateLoanSchedule(loan);
+    }
+
     @PutMapping("/update-loan")
     public Loan updateLoan(@RequestBody Loan loan){
         User currentUser = userService.getLoggedInUser();
@@ -69,12 +79,6 @@ public class LoanController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to delete this loan");
         }
         loanService.deleteLoan(id);
-    }
-
-    @GetMapping("/schedule/{id}")
-    public List<LoanScheduleRow> getLoanSchedule(@PathVariable("id") Long id) {
-        Loan loan = loanService.getLoanById(id);
-        return loanService.generateLoanSchedule(loan);
     }
 
 }
